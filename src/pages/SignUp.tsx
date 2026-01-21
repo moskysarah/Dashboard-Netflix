@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import loginImage from "../assets/netflix_white-removebg-preview.png";
 
-const Login = () => {
+const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -23,16 +23,27 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1️⃣ Création du compte Supabase
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
         setError(error.message);
-      } else {
-        navigate("/home"); // Netflix dashboard
+        return;
       }
+
+      // 2️⃣ (Optionnel) création du profil
+      if (data.user) {
+        await supabase.from("profiles").insert({
+          id: data.user.id,
+          role: "user",
+        });
+      }
+
+      // 3️⃣ Redirection vers login
+      navigate("/login");
     } catch (err) {
       console.error(err);
       setError("Une erreur est survenue, veuillez réessayer");
@@ -47,7 +58,7 @@ const Login = () => {
       <div className="hidden md:flex w-1/2 items-center justify-center bg-gradient-to-b from-[#E50914] to-black">
         <img
           src={loginImage}
-          alt="Netflix login"
+          alt="Netflix signup"
           className="w-80 h-80 object-contain"
         />
       </div>
@@ -56,13 +67,13 @@ const Login = () => {
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-md bg-black border-2 border-[#E50914] rounded-2xl p-8 space-y-6">
           <h1 className="text-3xl font-extrabold text-white text-center">
-            Welcome
+            Create Account
           </h1>
           <p className="text-center text-gray-400">
-            Log in to see all your movies
+            Sign up to start watching
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <input
               type="email"
               placeholder="Email"
@@ -91,14 +102,14 @@ const Login = () => {
                 loading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-700"
               }`}
             >
-              {loading ? "Connexion..." : "Login"}
+              {loading ? "Création..." : "Sign up"}
             </button>
           </form>
 
           <p className="text-center text-gray-400">
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-[#E50914] hover:underline">
-              Sign up
+            Already have an account?{" "}
+            <Link to="/login" className="text-[#E50914] hover:underline">
+              Login
             </Link>
           </p>
         </div>
@@ -107,4 +118,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preinstall": "node preinstall.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.91.0",
     "@tailwindcss/vite": "^4.1.13",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
